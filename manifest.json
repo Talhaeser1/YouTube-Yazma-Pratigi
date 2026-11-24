@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "YouTube Yazma Pratiği",
+  "version": "1.0.0",
+  "description": "YouTube videosu izlerken altyazıyı şeffaf bir katmanda yazarak hızlı yazma alıştırması yap.",
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/*"],
+      "js": ["src/transcript.js", "src/engine.js", "src/overlay.js", "src/main.js"],
+      "css": ["src/overlay.css"],
+      "run_at": "document_start",
+      "world": "MAIN"
+    }
+  ]
+}

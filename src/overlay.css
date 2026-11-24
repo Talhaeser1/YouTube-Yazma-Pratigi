@@ -1,0 +1,103 @@
+/* YTYaz katmanı — şeffaf, yalnızca transform/opacity animasyonu */
+#movie_player .ytyaz-layer {
+  position: absolute; left: 0; right: 0; z-index: 62;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  pointer-events: none; container-type: inline-size;
+  --lift: 72px; --scale: 1; /* 64px'te ipucu satırı ilerleme çubuğuna 2px kalıyordu (canlı ölçüm) */
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: #fff; box-sizing: border-box; padding: 0 8px;
+}
+#movie_player .ytyaz-layer[data-size="s"] { --scale: .8; }
+#movie_player .ytyaz-layer[data-size="l"] { --scale: 1.3; }
+#movie_player .ytyaz-layer[data-pos="bottom"] { bottom: 0; transform: translateY(calc(-1 * var(--lift))); transition: transform .2s; }
+#movie_player.ytp-big-mode .ytyaz-layer, #movie_player.ytp-fullscreen .ytyaz-layer { --lift: 100px; }
+#movie_player.ytp-autohide .ytyaz-layer[data-pos="bottom"] { transform: translateY(-16px); }
+#movie_player .ytyaz-layer[data-pos="mid"] { top: 50%; transform: translateY(-50%); }
+#movie_player .ytyaz-layer[data-pos="top"] { top: 72px; }
+#movie_player .ytyaz-layer.ytyaz-hidden,
+#movie_player .ytyaz-result.ytyaz-hidden { display: none; }
+#movie_player .ytyaz-layer * { box-sizing: border-box; }
+
+/* Durum şeridi */
+#movie_player .ytyaz-strip {
+  pointer-events: auto; display: inline-flex; align-items: center; gap: 10px;
+  font-size: clamp(11px, 1.3cqw, 14px); line-height: 1.6; padding: 1px 10px;
+  border-radius: 999px; background: rgba(0, 0, 0, .28); color: rgba(255, 255, 255, .85);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .9); user-select: none; white-space: nowrap;
+}
+#movie_player .ytyaz-mode { color: #ffd479; }
+#movie_player .ytyaz-btn {
+  all: unset; cursor: pointer; padding: 0 4px; color: rgba(255, 255, 255, .8);
+}
+#movie_player .ytyaz-btn:hover { color: #fff; }
+
+/* Ayar paneli */
+#movie_player .ytyaz-panel {
+  display: none; pointer-events: auto; font-size: 13px; line-height: 1.5;
+  background: rgba(20, 20, 20, .9); border-radius: 8px; padding: 8px 12px; color: #eee;
+}
+#movie_player .ytyaz-panel.ytyaz-open { display: block; }
+#movie_player .ytyaz-row { display: flex; align-items: center; gap: 6px; margin: 3px 0; }
+#movie_player .ytyaz-row > span { min-width: 120px; opacity: .8; }
+#movie_player .ytyaz-opt {
+  all: unset; cursor: pointer; padding: 1px 8px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, .25);
+}
+#movie_player .ytyaz-opt[data-on="1"] { background: rgba(255, 255, 255, .85); color: #111; }
+#movie_player .ytyaz-keys { opacity: .6; font-size: 12px; margin-top: 4px; }
+
+/* Yazı alanı */
+#movie_player .ytyaz-box {
+  pointer-events: auto; cursor: text; position: relative; width: min(94%, 1200px);
+  text-align: center; line-height: 1.35;
+  font-size: calc(clamp(15px, 2.5cqw, 40px) * var(--scale));
+  /* Açık/karışık karelerde de okunsun: sıkı koyu kontur, arka plan yine şeffaf */
+  text-shadow: 0 0 2px #000, 0 0 2px #000, 0 1px 3px rgba(0, 0, 0, .95), 0 0 8px rgba(0, 0, 0, .8);
+}
+#movie_player .ytyaz-line { font-weight: 600; white-space: pre-wrap; overflow-wrap: break-word; min-height: 1.35em; }
+#movie_player .ytyaz-line span { position: relative; }
+#movie_player .ytyaz-line .t { color: rgba(255, 255, 255, .82); }
+#movie_player .ytyaz-line .k { color: rgba(255, 255, 255, .55); } /* .38 açık karelerde neredeyse görünmüyordu */
+#movie_player .ytyaz-line .k.p { color: rgba(141, 255, 168, .72); }
+#movie_player .ytyaz-line .o { color: #8dffa8; }
+#movie_player .ytyaz-line .x { color: #ff5c5c; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+#movie_player .ytyaz-line.ytyaz-done .o { color: #9dffb0; }
+#movie_player .ytyaz-line .c::before {
+  content: ""; position: absolute; left: -1px; top: .12em; bottom: .12em; width: 2px;
+  background: #fff; opacity: .35; box-shadow: 0 0 2px rgba(0, 0, 0, .9);
+}
+#movie_player .ytyaz-layer.ytyaz-focused .c::before { opacity: 1; animation: ytyaz-blink 1.06s step-end infinite; }
+@keyframes ytyaz-blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+#movie_player .ytyaz-next { font-size: .62em; opacity: .7; margin-top: .3em; white-space: pre-wrap; min-height: 1em; }
+#movie_player .ytyaz-msg { font-weight: 600; opacity: .9; }
+#movie_player .ytyaz-hint {
+  font-size: .42em; opacity: 0; margin-top: .4em; letter-spacing: .02em; transition: opacity .2s;
+  color: rgba(255, 255, 255, .8); text-shadow: 0 1px 2px #000;
+}
+#movie_player .ytyaz-layer:not(.ytyaz-focused) .ytyaz-hint { opacity: .85; }
+#movie_player .ytyaz-input {
+  position: absolute; left: 0; bottom: 0; width: 1px; height: 1px; opacity: 0;
+  border: 0; padding: 0; margin: 0; resize: none; pointer-events: none; overflow: hidden;
+}
+
+/* Sonuç kartı */
+#movie_player .ytyaz-result {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 63;
+  width: min(86%, 440px); max-height: 80%; overflow: auto; padding: 14px 18px;
+  background: rgba(18, 18, 18, .9); color: #f1f1f1; border-radius: 12px; font: 14px/1.5 "Segoe UI", Roboto, Arial, sans-serif;
+}
+#movie_player .ytyaz-result h3 { margin: 0 0 8px; font-size: 16px; font-weight: 600; }
+#movie_player .ytyaz-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; text-align: center; }
+#movie_player .ytyaz-grid b { display: block; font-size: 20px; }
+#movie_player .ytyaz-grid small { opacity: .65; }
+#movie_player .ytyaz-miss { margin: 10px 0 4px; opacity: .85; }
+#movie_player .ytyaz-hist { margin: 4px 0 0; padding: 0; list-style: none; font-size: 12px; opacity: .8; }
+#movie_player .ytyaz-hist li { padding: 1px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#movie_player .ytyaz-close { all: unset; cursor: pointer; float: right; opacity: .7; }
+
+/* Oynatıcı kontrol çubuğundaki aç/kapa düğmesi */
+.ytp-right-controls .ytyaz-toggle {
+  display: inline-flex; align-items: center; justify-content: center; vertical-align: top;
+  font: 600 13px Roboto, Arial, sans-serif; color: #fff; opacity: .85; cursor: pointer;
+}
+.ytp-right-controls .ytyaz-toggle:hover { opacity: 1; }
+.ytp-right-controls .ytyaz-toggle[data-on="1"] { color: #ffd479; opacity: 1; }
