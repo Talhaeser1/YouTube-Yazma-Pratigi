@@ -177,7 +177,7 @@
     row('Yazı boyutu', 'size', [['s', 'Küçük'], ['m', 'Orta'], ['l', 'Büyük']]);
     row('Konum', 'pos', [['bottom', 'Alt'], ['mid', 'Orta'], ['top', 'Üst']]);
     row('YouTube altyazısını gizle', 'hide', [['1', 'Evet'], ['0', 'Hayır']]);
-    root.append(el('div', 'ytyaz-keys', 'Alt+Y yaz/bırak · Alt+S sonuç · Alt+R altyazıyı yenile'));
+    root.append(el('div', 'ytyaz-keys', 'Alt+Y aç/kapat · Alt+S sonuç · Alt+R altyazıyı yenile'));
     return { root, groups };
   }
 

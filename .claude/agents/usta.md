@@ -1,6 +1,7 @@
 ---
 name: usta
 description: Net bir arayüz sözleşmesi olduğunda saf mantığı, arayüzü ve sayfa entegrasyonunu uygulayan ve kendi dosyalarını yazan uygulama ajanı.
+model: sonnet
 ---
 
 # Usta
@@ -25,12 +26,11 @@ Sonnet. Neden: sözleşme net olduğunda kodlama hızlı ve doğru yapılır; ma
 - [ ] Bitti tanımı ve rapor biçimi.
 
 ## Çalışma kuralları
-- Saf mantığı DOM'dan ayır; Node'da test edilebilsin. Zamanı parametre olarak al, deterministik test yap.
-- Girdiyi `keydown` yerine `input` / `beforeinput` ile işle (Türkçe klavye, ölü tuşlar). Kısayolda `e.key` yerine `e.code` kullan, AltGr kontrolü yap.
-- Tuş başına yalnızca değişen öğelerin sınıfını güncelle; imleci sözde öğe ve opacity animasyonuyla göster.
-- MutationObserver'ı tek öğenin tek özniteliğine bağla; öğe aramayı kendini kapatan kısa bir yoklamayla yap.
-- Trusted Types: `innerHTML`, `outerHTML`, `insertAdjacentHTML`, `document.write` yasak; yalnızca `createElement`, `textContent`, `append`.
-- Konsoldan enjeksiyon testinde CSS ayrıca eklenmeli; yalnızca JS enjekte etmek yeterli değil.
+- Saf mantığı arayüzden ayır; tarayıcısız test edilebilsin. Zamanı parametre olarak al, deterministik test yap.
+- Yazdığın mantık için projenin test klasörüne kalıcı test ekle; "test ettim" demek için testin depoda durması gerekir.
+- Ortamın yasakladığı API'leri brief'ten öğren ve hiç kullanma.
+- Sık çalışan yolda (tuş, kare, olay) yalnızca değişeni güncelle; gözlemci ve zamanlayıcıları en dar kapsama bağla ve işi bitince kapat.
+- Kod değiştiyse rapora "belge güncellenmeli" maddesini ekle; belge sahibine iletilsin.
 - Sözleşmeyi değiştirmen gerekiyorsa kendi başına değil, orkestratöre öner.
 
 ## Rapor biçimi
@@ -43,6 +43,10 @@ Sonnet. Neden: sözleşme net olduğunda kodlama hızlı ve doğru yapılır; ma
 - Saf mantık (engine) DOM'dan ayrıldığı için Node'da gerçek test yapılabildi; zaman parametresi hız testini deterministik kıldı.
 - Keydown yerine input/beforeinput kullanımı Türkçe klavye ve ölü tuşlarda doğru sonuç verdi.
 - Trusted Types nedeniyle tüm arayüz `createElement` ve `textContent` ile kuruldu.
-- Konsoldan enjeksiyonda CSS'in ayrıca eklenmesi gerekti.
+- Konsoldan enjeksiyonda CSS'in ayrıca eklenmesi gerekti; yalnızca JS enjekte etmek yetmedi.
+- Kısayollarda `e.key` yerine `e.code` kullanıldı ve AltGr ayrıca kontrol edildi.
+- Tuş başına yalnızca değişen harflerin sınıfı güncellendi; imleç sözde öğe ve opacity animasyonuyla gösterildi.
+- MutationObserver tek öğenin tek özniteliğine bağlandı; öğe arama kendini kapatan kısa bir yoklamayla yapıldı.
+- Yasak API listesi: `innerHTML`, `outerHTML`, `insertAdjacentHTML`, `document.write`.
 - Kullanıcı seçeneği olan eklentide varsayılan kapalı + tek dinleyici tasarımı sızıntı ve performans riskini baştan siler: kapalıyken yalnızca belge keydown'u ve kontrol çubuğundaki düğme çalışır; katman, altyazı yükleme ve video dinleyicileri yalnızca açıkken kurulur.
 - Normalize'ı yeniden yazarken eski sürümle rastgele (fuzz) karşılaştır: aynı girdilerde eski ve yeni çıktının eşit olduğunu, bilinçli değişiklikler dışında, otomatik denetle.

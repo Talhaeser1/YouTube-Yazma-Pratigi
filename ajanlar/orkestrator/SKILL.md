@@ -29,13 +29,17 @@ Tek dosyalık küçük bir düzeltmede ekip kurulmaz; doğrudan yapılır.
 
 ## Çalışma kuralları
 - Önce kullanıcıya netleştirme soruları sor; en fazla birkaç soru, her biri tek karar.
-- Sözleşmeyi (ajanlar/SOZLESME.md) ajanlar başlamadan yaz; arayüz değişirse önce sözleşmeyi güncelle.
+- Sözleşmeyi ajanlar başlamadan yaz; arayüz değişirse önce sözleşmeyi güncelle.
+- Her dosyanın bir sahibi olsun: yapılandırma dosyaları, testler ve belgeler dahil. Sahipsiz dosya bırakma.
+- İşe başlamadan sürüm denetimi (Git) kurulu olsun; her ajan turu ayrı commit olsun.
+- İlerleme kaydını (PROGRESS.md) güncel tut: her özellik için durum ve kanıt (depodaki test ya da tarihli elle doğrulama). Kanıtı olmayan özelliği "tamam" diye işaretleme.
+- Bir işi yapan ajan o işin tek doğrulayıcısı olmasın; "bitti" kararından önce denetçi baksın.
 - Bağımsız işleri aynı mesajda paralel başlat; bağımlı işleri sırayla.
 - Tek kaynağı (tarayıcı, test ortamı, aynı dosya) aynı anda yalnızca bir ajana ver.
 - Ajan raporunu kanıt sayma. Doğrulanmamış maddeleri ayrı takip listesine al.
 - Bağımsız inceleme için incelemeciye sonucu değil kodu ver; kendi yorumunu aktarma.
 - Düzeltmeyi, bulguyu üreten ajana (bağlamı olana) geri gönder; yeni ajan açma.
-- "Bitti" demeden önce canlı doğrulamanın yapıldığından emin ol.
+- "Bitti" demeden önce canlı doğrulamanın yapıldığından ve kod değiştiyse belgelerin de güncellendiğinden emin ol.
 - Kullanıcının beğendiği ve beğenmediği tercihleri hafızaya kaydet.
 
 ## Rapor biçimi (kullanıcıya)
@@ -44,6 +48,8 @@ Tek dosyalık küçük bir düzeltmede ekip kurulmaz; doğrudan yapılır.
 - Kullanıcıdan istenen karar varsa tek soru olarak.
 
 ## Bu projeden çıkan dersler
+- Bu projede sözleşme `ajanlar/SOZLESME.md`, alt ajan tanımları `.claude/agents/` altındadır.
+- İlk sürümde Git ve kalıcı test yoktu; "test edildi" iddiaları sonradan doğrulanamadı ve rehber koddan geri kaldı. Yukarıdaki Git / PROGRESS / belge kuralları bu yüzden eklendi.
 - Paralel yazan ajanlarda "her ajan yalnızca kendi dosyasına yazar" kuralı ve sabit arayüz çakışmayı sıfırladı.
 - Tarayıcı gibi tek kaynağı aynı anda yalnızca bir ajana vermek gerekiyor.
 - Ajan raporu kanıt değildir; doğrulanmamış maddeler ayrı takip edildi.

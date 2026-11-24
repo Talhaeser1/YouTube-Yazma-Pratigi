@@ -16,7 +16,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '1.0.4';
+  const VERSION = '1.1.0'; // manifest.json'daki version ile aynı tutulur
   const YTYaz = (window.YTYaz = window.YTYaz || {});
   if (YTYaz.transcript && YTYaz.transcript.__version === VERSION) return; // idempotent
 

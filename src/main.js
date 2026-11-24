@@ -22,7 +22,7 @@
       vid, session: null, video: null, player: null,
       lineDone: false, ahead: false, weStopped: false,
       saved: false, ad: false, rvfc: 0,
-      focused: false, finished: false, extra: '', title: '',
+      focused: false, finished: false, extra: '', title: '', titleSet: false, data: null, pending: '',
     };
     let poll = 0, obs = null;
     const ov = () => Y.overlay;
@@ -152,15 +152,17 @@
 
     function onInput(raw) {
       const s = st.session;
-      if (!s || st.ad || s.finished || st.finished || !st.focused) return;
+      // Altyazı henüz yüklenmedi: basılan tuşları sakla, begin() satır gelince uygular (yoksa ilk tuşlar kayboluyordu).
+      if (!s) { if (st.focused && !st.ad) st.pending = raw; return; }
+      if (st.ad || s.finished || st.finished || !st.focused) return;
       if (st.lineDone) {
         // Satır bitti ama video geride: sonraki satır için tuşları tamponla.
-        const c = Y.engine.clean(raw);
+        const c = s.clean(raw);
         if (c.startsWith(s.typed)) st.extra = c.slice(s.typed.length).replace(/^ /, '');
         else ov().setInputValue(s.typed);
         return;
       }
-      if (!st.title || !st.titleKey) { st.title = pageTitle(); st.titleKey = true; }
+      if (!st.titleSet) { st.title = pageTitle(); st.titleSet = true; }
       const r = s.setTyped(raw);
       ov().setInputValue(s.typed);
       if (r.changed.length) ov().updateLine(r.changed, s.states, s.typed.length);
@@ -199,10 +201,15 @@
 
     // ---------- başlatma ----------
     function begin(data) {
-      const s = Y.engine.createSession(data && data.cues);
+      const s = Y.engine.createSession(data && data.cues, data && data.lang);
       if (!s.count) { ov().setMessage('Bu videoda altyazı yok'); return; }
+      st.data = data;
       st.session = s;
+      st.saved = false;
       resync();
+      const p = st.pending;
+      st.pending = '';
+      if (p && st.focused) { ov().setInputValue(p); onInput(p); }
       if (!st.video.paused) startFrames();
     }
 
@@ -233,6 +240,9 @@
         onClose() { disable(); },
       });
       if (autoFocus) ov().focusInput();
+      // Alt+R'de yazma alanı zaten odaktadır ve yeniden focus olayı üretmez; durumu doğrudan oku
+      // (yoksa yeni oturum odakta olmadığını sanıp hiçbir tuşu işlemiyordu).
+      st.focused = !!ov().isFocused();
       ov().setStats(0, 100);
       ov().setMode('');
 
@@ -246,8 +256,18 @@
       on('playing', startFrames);
       on('pause', () => { stopFrames(); if (st.session) st.session.idle(); updateMode(); });
       on('seeking', () => { if (st.session) st.session.idle(); });
-      on('seeked', () => { if (st.session && !st.ad) resync(); });
-      on('ended', () => { if (st.session && !st.finished && st.session.stats().total) { saveHistory(); showResult(); } });
+      on('seeked', () => {
+        if (!st.session || st.ad) return;
+        // Önceki deneme kaydedildiyse (bitiş/video sonu) geri sarınca yeni oturum başlar; yoksa hiç kaydedilmezdi.
+        if (st.saved) begin(st.data); else resync();
+      });
+      on('ended', () => {
+        // Reklam da aynı video öğesinde oynar; reklamın bitişi oturumu bitirmesin.
+        if (st.ad || player.classList.contains('ad-showing')) return;
+        if (st.session && !st.finished && st.session.stats().total) { saveHistory(); showResult(); }
+      });
+      // Sekme kapanınca / sayfa yenilenince de oturum geçmişe yazılsın.
+      window.addEventListener('pagehide', saveHistory, { signal: sig });
 
       obs = new MutationObserver(checkAd);
       obs.observe(player, { attributes: true, attributeFilter: ['class'] });
@@ -372,6 +392,22 @@
     setButton(false);
   }
 
+  // Gezinme başlar başlamaz kapat: yt-navigate-finish birkaç saniye gecikebiliyor ve o arada eski
+  // oturum (aynı <video> öğesi üzerinden) YENİ videoyu eski cue sonlarında durdurabiliyordu (canlı test).
+  function onNavStart(e) {
+    if (!enabled) return;
+    const url = e && e.detail && e.detail.url;
+    if (!url) return;
+    let next = '';
+    try { const u = new URL(url, location.href); next = u.pathname === '/watch' ? (u.searchParams.get('v') || '') : ''; } catch (err) { return; }
+    if (ctl && next === ctl.vid) return; // aynı video: dokunma
+    enabled = false;
+    stop(false);
+    if (Y.overlay) Y.overlay.unmount();
+    hideNative(false);
+    setButton(false);
+  }
+
   Y.main = { toggle, enable, disable, isEnabled: () => enabled };
 
   document.addEventListener('keydown', (e) => {
@@ -382,6 +418,7 @@
     e.stopPropagation();
     toggle();
   }, true);
+  document.addEventListener('yt-navigate-start', onNavStart);
   document.addEventListener('yt-navigate-finish', onNav);
   document.addEventListener('yt-page-data-updated', ensureButton);
   if (document.readyState === 'loading') {

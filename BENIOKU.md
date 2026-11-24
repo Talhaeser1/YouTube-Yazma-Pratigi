@@ -1,6 +1,6 @@
 # YouTube Yazma Pratiği
 
-YouTube videosu izlerken altyazı metnini, videonun alt kısmındaki şeffaf bir katmana yazarak hızlı yazma pratiği yaparsın. Harfleri doğru yazdıkça yeşil, yanlış yazdıkça kırmızı görünür; video yazdığın hıza göre ilerler. Sonunda dakikada kaç tuş (DKS) ve doğruluk oranın gösterilir.
+YouTube videosu izlerken altyazı metnini, videonun alt kısmındaki şeffaf bir katmana yazarak hızlı yazma pratiği yaparsın. Harfleri doğru yazdıkça yeşil, yanlış yazdıkça kırmızı görünür; video yazdığın hıza göre ilerler. Sonunda dakikada kaç kelime yazdığın (DKS) ve doğruluk oranın gösterilir.
 
 ## Kurulum (adım adım)
 
@@ -39,7 +39,7 @@ Katmandaki **Ayarlar** ve **Sonuç** düğmeleriyle de Alt+S ve ayar işlemleri 
 ### Yazma kuralları
 
 - **Video beni bekler:** Yalnızca katman açık ve yazma modundayken geçerlidir. Yazarken video, yazdığın satırın sonuna gelirse video kendiliğinden durur. Satırı bitirdiğinde video otomatik devam eder.
-- **Yazma modu kapalıyken video durmaz.** Esc ile yazma modundan çıkınca ya da katman kapalıyken altyazı yalnızca videoyla birlikte ilerler.
+- **Yazma modu kapalıyken video durmaz.** Esc ile yazma modundan çıkınca ya da katman kapalıyken altyazı yalnızca videoyla birlikte ilerler. Video seni beklerken başka bir pencereye ya da sekmeye geçersen de yazma modundan çıkılır ve video kendiliğinden devam eder.
 - **Oynatma hızı:** 0.75x, 1x, 1.5x gibi hızları YouTube'un kendi hız ayarından değiştirirsin. Katman videonun gerçek konumuna göre ilerlediği için hıza kendiliğinden uyum sağlar.
 - **Renkler:**
   - Gri: henüz yazılmamış harf.
@@ -48,7 +48,8 @@ Katmandaki **Ayarlar** ve **Sonuç** düğmeleriyle de Alt+S ve ayar işlemleri 
   - Soluk gri nokta / virgül: henüz geçilmemiş noktalama işareti. Yazman gerekmez.
   - Soluk yeşil noktalama: geçilmiş noktalama işareti; kendiliğinden işaretlenir.
 - **Satır özgün yazımıyla görünür:** Büyük harfler, virgül ve nokta satırda aynen yazılır. Yazarken bunları zorunlu olarak yazmazsın.
-- **Büyük-küçük harf sayılmaz.** "merhaba" ile "Merhaba" aynı kabul edilir. Türkçe harfler (ı, i, ş, ğ, ü, ö, ç) doğru işlenir.
+- **Büyük-küçük harf sayılmaz.** "merhaba" ile "Merhaba" aynı kabul edilir. Türkçe harfler (ı, i, ş, ğ, ü, ö, ç) doğru işlenir. Türkçe altyazıda büyük "I" için "ı", İngilizce gibi diğer dillerde "i" yazılır.
+- **Altyazı dili:** Türkçe altyazı varsa o kullanılır; yoksa videodaki mevcut altyazı (ör. İngilizce) gelir.
 - **Boşluklar:** Kelimeler arasında boşluk tuşuna bir kez bas. Virgül ve nokta yazmana gerek yok; boşluk, aradaki noktalamanın yerine geçer.
 
 ### Ayarlar
@@ -65,7 +66,10 @@ Ayarlar tarayıcında saklanır; bir sonraki açılışta da geçerlidir.
 
 - Altyazının sonuna gelince, ya da katman açıkken **Alt+S** / **Sonuç** düğmesiyle sonuç kartı açılır.
 - Kartta DKS, doğruluk, süre, tuş sayısı, en çok yanlış yapılan harfler ve son oturumların listesi bulunur.
-- Bir oturum en az 5 tuş vuruşu içeriyorsa geçmişe kaydedilir. En son 20 kayıt tutulur.
+- **DKS**, dakikadaki kelime sayısıdır: 5 doğru tuş bir kelime sayılır. 3 saniyeden uzun duraklamalar süreye katılmaz.
+- Bir oturum en az 5 tuş vuruşu içeriyorsa geçmişe kaydedilir: katmanı kapatınca, video bitince, başka videoya geçince ya da sekmeyi kapatınca. En son 20 kayıt tutulur.
+- Videoyu bitirdikten sonra geri sarıp yeniden yazarsan bu yeni bir oturum sayılır ve ayrıca kaydedilir.
+- Geçmiş bu tarayıcıda, YouTube'un site verileri içinde saklanır. Tarayıcıdan YouTube site verilerini silersen geçmiş ve ayarlar da silinir.
 
 ## Sorun giderme
 
@@ -93,6 +97,10 @@ Dosyalarda değişiklik yaptıysan:
 YouTube-Yazma-Pratigi/
 ├── manifest.json        Eklentinin tanımı (hangi dosyaların, hangi sitede çalışacağı)
 ├── BENIOKU.md           Bu belge
+├── PROGRESS.md          Hangi özellik ne durumda, neyle doğrulandı
+├── AGENTS.md            Projede çalışacak yapay zekâ araçları için giriş notu
+├── test/run.js          Otomatik testler (çalıştırma: node test/run.js)
+├── .claude/agents/      Alt ajan tanımları (kullanıcı için gerekmez)
 ├── src/
 │   ├── transcript.js    Video altyazısını bulur ve indirir
 │   ├── engine.js        Yazma mantığı: karşılaştırma, DKS, doğruluk

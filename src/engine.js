@@ -15,7 +15,14 @@
   // bir 'ayraç' koşusu olur ve iki kelime arasında TEK boşluk üretir. Boşluk, koşunun SON özgün
   // karakterine eşlenir ("Merhaba, dünya" → boşluk karakteri yazılır, virgül atlanır).
   // keepTrailing: kullanıcının yazdığı metinde sondaki boşluk korunur.
-  function walk(text, keepTrailing) {
+  // lang: altyazı dili. Türkçe/Azerice'de I→ı, İ→i; diğer dillerde I→i (yoksa "I think" hata sayılır).
+  // Verilmezse Türkçe kabul edilir.
+  const TR_LANG = /^(tr|az)(-|$)/i;
+  function lower(ch, lang) {
+    if (lang == null || TR_LANG.test(lang)) return ch.toLocaleLowerCase('tr');
+    return ch.toLowerCase().replace(/̇/g, ''); // İ → "i̇" olur; birleşen noktayı at
+  }
+  function walk(text, keepTrailing, lang) {
     const chars = Array.from(String(text == null ? '' : text).normalize('NFC'));
     const map = new Int32Array(chars.length).fill(-1); // özgün indeks → hedef indeks (-1: atlanan)
     const t2o = [];                                     // hedef indeks → özgün indeks
@@ -23,7 +30,7 @@
     for (let i = 0; i < chars.length; i++) {
       const ch = chars[i];
       if (APOS.has(ch)) continue;
-      const lc = ch.toLocaleLowerCase('tr');
+      const lc = lower(ch, lang);
       if (LETTER.test(lc)) {
         if (pend >= 0 && target) { map[pend] = target.length; t2o.push(pend); target += ' '; }
         pend = -1;
@@ -35,9 +42,9 @@
     if (keepTrailing && pend >= 0 && target) { map[pend] = target.length; t2o.push(pend); target += ' '; }
     return { chars, map, t2o, target };
   }
-  function normalize(text) { return walk(text, false).target; }
+  function normalize(text, lang) { return walk(text, false, lang).target; }
   // Kullanıcının yazdığı ham metin: baştaki boşluk atılır, sondaki kalır (yazım sürüyor olabilir).
-  function clean(raw) { return walk(raw, true).target; }
+  function clean(raw, lang) { return walk(raw, true, lang).target; }
 
   // İkili arama: end > t olan ilk cue'nun indeksi (yoksa cues.length).
   function findCueIndex(cues, t) {
@@ -49,10 +56,10 @@
     return lo;
   }
 
-  function createSession(rawCues) {
+  function createSession(rawCues, lang) {
     const cues = [];
     for (const c of rawCues || []) {
-      const w = walk(String(c.text == null ? '' : c.text).replace(/\s+/g, ' ').trim(), false);
+      const w = walk(String(c.text == null ? '' : c.text).replace(/\s+/g, ' ').trim(), false, lang);
       if (w.target) cues.push({ start: c.start, end: c.end, text: c.text, target: w.target, orig: w.chars, map: w.map, t2o: w.t2o });
     }
 
@@ -83,13 +90,15 @@
       seekTime(t) { s.index = findCueIndex(cues, t); s.resetLine(); lastTs = null; },
       advance() { s.index++; s.resetLine(); return !s.finished; },
       idle() { lastTs = null; },
+      // Ham girdiyi bu oturumun diliyle normalize eder.
+      clean(raw) { return clean(raw, lang); },
 
       // Ham girdiyi uygular. Dönüş: değişen karakter indeksleri ve satır bitti mi.
       setTyped(raw, now) {
         if (s.done || s.finished) return { changed: [], done: s.done };
         now = now == null ? Date.now() : now;
         const target = s.target;
-        let nt = clean(raw);
+        let nt = clean(raw, lang);
         if (nt.length > target.length) nt = nt.slice(0, target.length);
         const old = s.typed;
         if (nt === old) return { changed: [], done: false };
@@ -114,7 +123,8 @@
           if (s.states[i] !== st) { s.states[i] = st; changed.push(i); }
         }
         s.typed = nt;
-        if (nt.length >= target.length) { s.done = true; lines++; lastTs = null; }
+        // lastTs korunur: satırlar arası süre de (IDLE_GAP'ten kısaysa) aktif süreye sayılır.
+        if (nt.length >= target.length) { s.done = true; lines++; }
         return { changed, done: s.done };
       },
 
