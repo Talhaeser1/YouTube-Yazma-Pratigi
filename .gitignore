@@ -1,0 +1,26 @@
+# İşletim sistemi
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editör
+.vscode/
+.idea/
+*.swp
+
+# Node (bağımlılık yok, yine de)
+node_modules/
+npm-debug.log*
+
+# Paketlenmiş eklenti ve imza anahtarı — anahtar asla yayınlanmamalı
+*.crx
+*.pem
+*.zip
+
+# Ortam değişkenleri ve gizli bilgiler
+.env
+.env.*
+
+# Claude Code kişisel ayarları (ajan tanımları .claude/agents/ paylaşılır)
+.claude/settings.local.json
+.claude/projects/
